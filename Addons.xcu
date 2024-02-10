@@ -13,12 +13,12 @@
                     <prop oor:name="Target" oor:type="xs:string">
                         <value>_self</value>
                     </prop>
-                    <prop oor:name="URL" oor:type="xs:string">
-                        <value>http://openoffice.org/2001/registry</value>
+                    <prop oor:name="URL">
+                        <value>service:org.extension.sample.do?FirstMenuItem</value>
                     </prop>
                     <prop oor:name="ImageIdentifier" oor:type="xs:string">
-                    <value>%origin%/icons/perec</value>
-                </prop>
+                        <value>%origin%/icons/perec</value>
+                    </prop>
                 </node>
             </node>
         </node>
