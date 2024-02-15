@@ -13,24 +13,15 @@ class Wavelet( unohelper.Base, XJobExecutor, XEventListener ):
     def __init__( self, ctx ):
         self.ctx = ctx
 
-        desktop = ctx.getServiceManager().createInstanceWithContext("com.sun.star.frame.Desktop", ctx)
-        self.doc = desktop.getCurrentComponent()
-
-        self.doc.Text.addEventListener(wavelet)
-
-
     def documentEventOccured(self, event):
         if event.EventName == "InsertText":
             self.trigger(None)
 
-    def get_cursor_on_last_modified_word(self):
-        if self.doc is None:
-            return
-        
-        text = self.doc.Text
+    def get_cursor_on_last_modified_word(self, document):
+        text = document.Text
 
         # Get the view cursor
-        view_cursor = self.doc.CurrentController.getViewCursor()
+        view_cursor = document.CurrentController.getViewCursor()
         
         # Get the position of the last modified character
 
@@ -46,17 +37,19 @@ class Wavelet( unohelper.Base, XJobExecutor, XEventListener ):
         return cursor
     
     def trigger( self, args ):
-        if self.doc is None:
-            return
+        desktop = self.ctx.ServiceManager.createInstanceWithContext(
+            "com.sun.star.frame.Desktop", self.ctx )
+        doc = desktop.getCurrentComponent()
+        text = doc.Text
 
         last_word_cursor = self.get_cursor_on_last_modified_word(doc)
 
         try:
-            search = self.doc.createSearchDescriptor()
+            search = doc.createSearchDescriptor()
             search.SearchWords = True
             search.SearchString = last_word_cursor.getString()
 
-            found = self.doc.findAll( search )
+            found = doc.findAll( search )
             
             if(found.Count > 1):
                 last_word_cursor.CharBackColor = 0xFFFF00
@@ -65,6 +58,7 @@ class Wavelet( unohelper.Base, XJobExecutor, XEventListener ):
             else:
                 # since we are only selecting tangent words, this doesn't get updated when you erase the duplicate word
                 last_word_cursor.CharBackColor = -1
+                
     
         except Error as e:
             show_message_box(e, "Error")

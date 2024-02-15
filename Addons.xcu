@@ -14,7 +14,7 @@
                         <value>_self</value>
                     </prop>
                     <prop oor:name="URL">
-                        <value>service:org.extension.sample.do?FirstMenuItem</value>
+                        <value>service:org.extension.sample.do</value>
                     </prop>
                     <prop oor:name="ImageIdentifier" oor:type="xs:string">
                         <value>%origin%/icons/perec</value>

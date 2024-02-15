@@ -8,7 +8,7 @@ FILES = \
     icons/*.bmp
 
 oulipo.oxt: $(FILES)
-	zip -r - $^ > $@ 
+	zip -q -r - $^ > $@
 	
 .PHONY: clean
 clean:
