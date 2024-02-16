@@ -1,15 +1,16 @@
 import uno
 import unohelper
+from unidecode import unidecode
 from com.sun.star.task import XJobExecutor
 from com.sun.star.text import XTextDocument
 from com.sun.star.lang import XEventListener
 
  
-class Wavelet( unohelper.Base, XJobExecutor, XEventListener ):
+class Wavelet( unohelper.Base, XJobExecutor):
     def __init__( self, ctx ):
         self.ctx = ctx
     
-    def trigger( self ):
+    def trigger( self , args ):
         desktop = self.ctx.ServiceManager.createInstanceWithContext("com.sun.star.frame.Desktop", self.ctx)
         doc = desktop.getCurrentComponent()
         text = doc.Text
@@ -23,7 +24,7 @@ class Wavelet( unohelper.Base, XJobExecutor, XEventListener ):
                 cursor.gotoPreviousWord(False)
                 cursor.gotoEndOfWord(True)
 
-                currentWord = cursor.getString().strip().lower()
+                currentWord = unidecode(cursor.getString().strip().lower())
                 
                 if currentWord in dictionary:
                     cursor.CharBackColor = 0xFFFF00
@@ -42,7 +43,7 @@ class Wavelet( unohelper.Base, XJobExecutor, XEventListener ):
 # Starting from Python IDE
 def main():
     try:
-        ctx = XSCRIPTCONTEXT .getComponentContext()
+        ctx = XSCRIPTCONTEXT
     except NameError:
         ctx = officehelper.bootstrap()
         if ctx is None:
