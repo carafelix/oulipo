@@ -2,8 +2,9 @@ import uno
 import unohelper
 from unidecode import unidecode
 from com.sun.star.task import XJobExecutor
-from com.sun.star.text import XTextDocument
-from com.sun.star.lang import XEventListener
+from com.sun.star.document import XDocumentEventListener
+
+
 
  
 class Wavelet( unohelper.Base, XJobExecutor):
@@ -14,30 +15,7 @@ class Wavelet( unohelper.Base, XJobExecutor):
         desktop = self.ctx.ServiceManager.createInstanceWithContext("com.sun.star.frame.Desktop", self.ctx)
         doc = desktop.getCurrentComponent()
         text = doc.Text
-        try:
-            cursor = text.createTextCursor()
-            cursor.gotoStart(False)
-            dictionary = {}
-
-            while cursor.gotoNextWord(True):
-
-                cursor.gotoPreviousWord(False)
-                cursor.gotoEndOfWord(True)
-
-                currentWord = unidecode(cursor.getString().strip().lower())
-                
-                if currentWord in dictionary:
-                    cursor.CharBackColor = 0xFFFF00
-                else:
-                    dictionary[currentWord] = True
-                    cursor.CharBackColor = -1
-                
-                cursor.gotoPreviousWord(False)
-                cursor.gotoNextWord(False)
-
-        except Exception as e:
-            print("Error:", e)
-            pass
+        doc.addDocumentEventListener(DocumentEventListener(doc))
 
 
 # Starting from Python IDE
@@ -53,6 +31,58 @@ def main():
 # Starting from command line
 if __name__ == "__main__":
     main()
+
+class DocumentEventListener(unohelper.Base, XDocumentEventListener):
+
+    def __init__(self, doc):
+        self._doc = doc
+
+    def documentEventOccured(self, event):
+        # ~ app.debug(event.EventName)
+        if event.EventName == 'OnLayoutFinished':
+            self._search()
+        return
+
+    def _search(self):
+        current = self._doc.CurrentController.ViewCursor.Start
+        cursor = self._doc.Text.createTextCursorByRange(current)
+        cursor.gotoStartOfWord(False)
+        cursor.gotoEndOfWord(True)
+
+        search = self._doc.createSearchDescriptor()
+        search.SearchWords = True
+        search.SearchString = cursor.String
+
+        found = self._doc.findAll(search)
+
+        strict_pattern = self._build_strict_pattern(cursor.String)
+        search.SearchRegularExpression = True
+        search.SearchString = strict_pattern
+        strict_found = self._doc.findAll(search)
+
+        cursor.CharBackColor = -1
+        if found.Count > 1 or strict_found.Count > 1:
+            cursor.CharBackColor = 0xFFFF00
+        return
+
+    def _build_strict_pattern( self , word ):
+
+        pattern = ''
+        for char in word:
+            if unidecode(char) == 'a':
+                pattern += '[aáàâä]'
+            elif unidecode(char) == 'e':
+                pattern += '[eéèêë]'
+            elif unidecode(char) == 'i':
+                pattern += '[iíìîï]'
+            elif unidecode(char) == 'o':
+                pattern += '[oóòôö]'
+            elif unidecode(char) == 'u':
+                pattern += '[uúùûü]'
+            else:
+                pattern += char
+
+        return r"\b(" + pattern + r")\b"
 
 
 # pythonloader loads a static g_ImplementationHelper variable

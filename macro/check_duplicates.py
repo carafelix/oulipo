@@ -9,20 +9,19 @@ def check_duplicates():
         cursor.gotoStart(False)
         dictionary = {}
 
-        while cursor.gotoNextWord(True):
-
-            cursor.gotoPreviousWord(False)
+        while cursor.goRight(1, False):
+            cursor.goLeft(1, False)
             cursor.gotoEndOfWord(True)
 
             currentWord = unidecode(cursor.getString().strip().lower())
+            print(currentWord)
                 
             if currentWord in dictionary:
                 cursor.CharBackColor = 0xFFFF00
             else:
                 dictionary[currentWord] = True
                 cursor.CharBackColor = -1
-                
-            cursor.gotoPreviousWord(False)
+            
             cursor.gotoNextWord(False)
 
     except Exception as e:
