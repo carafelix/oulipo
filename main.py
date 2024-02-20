@@ -60,9 +60,10 @@ class DocumentEventListener(unohelper.Base, XDocumentEventListener):
         search.SearchString = strict_pattern
         strict_found = self._doc.findAll(search)
 
-        cursor.CharBackColor = -1
         if found.Count > 1 or strict_found.Count > 1:
             cursor.CharBackColor = 0xFFFF00
+        elif cursor.CharBackColor == 0xFFFF00:
+            cursor.CharBackColor = -1
         return
 
     def _build_strict_pattern( self , word ):
